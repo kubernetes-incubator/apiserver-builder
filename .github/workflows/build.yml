@@ -207,3 +207,58 @@ jobs:
 
           #sleep 5 # Hold for 1min
           #kubectl get fs festival-example -o jsonpath="{.spec.invited}" | grep 1 # successfully processed by controller
+  non-etcd-example-container:
+    runs-on: ubuntu-latest
+    name: Testing Non-Etcd Example Container Build
+    steps:
+      - name: Set up Golang
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: 1.15
+      - uses: actions/checkout@v2.3.1
+        with:
+          path: go/src/sigs.k8s.io/apiserver-builder-alpha/
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.0.0
+      - name: Workspace Preparing
+        env:
+          GOPATH: ${{ github.workspace }}/go
+        working-directory: ${{ github.workspace }}/go/src/sigs.k8s.io/apiserver-builder-alpha/
+        run: |
+          sudo systemctl start mysql.service
+      - name: Install apiserver-boot
+        working-directory: ${{ github.workspace }}/go/src/sigs.k8s.io/apiserver-builder-alpha/
+        env:
+          GOPATH: ${{ github.workspace }}/go
+        run: |
+          mkdir -p bin
+          go build -o ${GOPATH}/bin/apiserver-boot ./cmd/apiserver-boot/main.go
+      - name: Install controller-tools
+        run: |
+          go get sigs.k8s.io/controller-tools/cmd/controller-gen
+          go install sigs.k8s.io/controller-tools/cmd/controller-gen
+      - name: Building and running container images
+        working-directory: ${{ github.workspace }}/go/src/sigs.k8s.io/apiserver-builder-alpha/example/non-etcd
+        env:
+          GOPATH: ${{ github.workspace }}/go
+          GOBIN: ${{ github.workspace }}/go/bin
+        run: |
+          export PATH=${PATH}:${GOBIN}
+          controller-gen +object +paths=./pkg/apis/...
+
+          export IMAGE="example.io/non-etcd"
+          apiserver-boot build container --image ${IMAGE} --targets=apiserver
+          kind load docker-image ${IMAGE} --name chart-testing
+
+          kubectl create -f config/
+
+          sleep 120 # Hold for 2 min
+
+          kubectl api-resources \
+            || kubectl get pod -o name | grep non-etcd-apiserver | xargs -I {} kubectl logs {} -c apiserver
+          kubectl create -f sample/burger.yaml
+          kubectl get burger burger-example -o yaml
+
+          #sleep 5 # Hold for 1min
+          #kubectl get fs festival-example -o jsonpath="{.spec.invited}" | grep 1 # successfully processed by controller
+

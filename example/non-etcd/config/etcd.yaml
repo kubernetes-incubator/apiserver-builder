@@ -1,0 +1,86 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: etcd
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: etcd
+  serviceName: "etcd"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: etcd
+        image: quay.io/coreos/etcd:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 30Mi
+        env:
+        - name: ETCD_DATA_DIR
+          value: /etcd-data-dir
+        command:
+        - /usr/local/bin/etcd
+        - --listen-client-urls
+        - http://0.0.0.0:2379
+        - --advertise-client-urls
+        - http://localhost:2379
+        ports:
+        - containerPort: 2379
+        volumeMounts:
+        - name: etcd-data-dir
+          mountPath: /etcd-data-dir
+        readinessProbe:
+          httpGet:
+            port: 2379
+            path: /health
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          httpGet:
+            port: 2379
+            path: /health
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+  volumeClaimTemplates:
+  - metadata:
+     name: etcd-data-dir
+     annotations:
+        volume.beta.kubernetes.io/storage-class: standard
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+         storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd-svc
+  namespace: default
+  labels:
+    app: etcd
+spec:
+  ports:
+  - port: 2379
+    name: etcd
+    targetPort: 2379
+  selector:
+    app: etcd

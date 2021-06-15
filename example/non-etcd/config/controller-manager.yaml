@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: non-etcd-controller
+  namespace: default
+  labels:
+    api: non-etcd
+    controller: "true"
+spec:
+  selector:
+    matchLabels:
+      api: non-etcd
+      controller: "true"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        api: non-etcd
+        controller: "true"
+    spec:
+      containers:
+      - name: controller
+        image: example.io/non-etcd
+        command:
+        - "./controller-manager"
+        args:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 100m
+            memory: 300Mi
+      volumes:
+      - name: apiserver-certs
+        secret:
+          secretName: non-etcd

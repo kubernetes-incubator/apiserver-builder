@@ -1,0 +1,79 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: non-etcd-apiserver
+  namespace: default
+  labels:
+    api: non-etcd
+    apiserver: "true"
+spec:
+  selector:
+    matchLabels:
+      api: non-etcd
+      apiserver: "true"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        api: non-etcd
+        apiserver: "true"
+    spec:
+      containers:
+      - name: apiserver
+        image: example.io/non-etcd
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: apiserver-certs
+          mountPath: /apiserver.local.config/certificates
+          readOnly: true
+        command:
+        - "./apiserver"
+        args:
+        - "--etcd-servers=http://etcd-svc:2379"
+        - "--tls-cert-file=/apiserver.local.config/certificates/tls.crt"
+        - "--tls-private-key-file=/apiserver.local.config/certificates/tls.key"
+        - "--audit-log-path=-"
+        - "--feature-gates=APIPriorityAndFairness=false"
+        - "--audit-log-maxage=0"
+        - "--audit-log-maxbackup=0"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 30Mi
+      volumes:
+      - name: apiserver-certs
+        secret:
+          secretName: non-etcd
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: non-etcd
+  namespace: default
+  labels:
+    api: non-etcd
+    apiserver: "true"
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURiRENDQWxTZ0F3SUJBZ0lJQmFZa2thTDVnWmN3RFFZSktvWklodmNOQVFFTEJRQXdhREVMTUFrR0ExVUUKQmhNQ2RXNHhDekFKQmdOVkJBZ01Bbk4wTVFvd0NBWURWUVFIREFGc01Rb3dDQVlEVlFRS0RBRnZNUXN3Q1FZRApWUVFMREFKdmRURW5NQ1VHQTFVRUF3d2VibTl1TFdWMFkyUXRZMlZ5ZEdsbWFXTmhkR1V0WVhWMGFHOXlhWFI1Ck1CNFhEVEl4TURReU9URXdNREF4TWxvWERUTXhNRFF5TnpFd01EQXhNMW93SHpFZE1Cc0dBMVVFQXhNVWJtOXUKTFdWMFkyUXVaR1ZtWVhWc2RDNXpkbU13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQgpBUUMrazVHZm45ZFlWQ0VtRHJhNGo0VkdMUmJrK1ArRkpXVGJGQllBVHZjMUdUTXZmdExLNWRBNGZWVjJSSUFlCmNjc3B3ZVAzZlcrUW02R1Q4UmZjRStYVzV4QzlGM3liZWcwdHFVUDBEVHZXczZTL3Q3L2VqZTVlczY5QjJrVmQKOTIrMll0bWhrYTZjeDRNSitqeHM5andlS3BJVWVPdjRvR3FHQm5uZ0k5b28zb2VjZVhqanlDY2JZanhJejhlago3eERkSGtibk1mdnNDY1I2NzlCZFhRLzc3OGl6UUd4LzFQeVRHdW9vWHlMVmFIbldxcEdrd1ZscUw1a2FiZzNwCjdJQm1FLzlFK245QXBrd3B6UXBNS1U3VXhlVEFRWDZXK1dRc2RPMFJBek4rVmlFeDRkZm1VaU1UTUY0OU1acEgKZVlON2g4YUs3dkRFd0NtSEtjR2dBSjg5QWdNQkFBR2pZekJoTUE0R0ExVWREd0VCL3dRRUF3SUZvREFkQmdOVgpIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUlLd1lCQlFVSEF3SXdNQVlEVlIwUkJDa3dKNElKYkc5allXeG9iM04wCmdoUnViMjR0WlhSalpDNWtaV1poZFd4MExuTjJZNGNFZndBQUFUQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUEKcWF0UERXK1d1QWVBMG9WRFN5dGxzaGh1MlpCbXZNREtXNjlDSlFNOWVpNFdRRjJJWXl5OTZvckpBditXZHpyYgpJWjZEM2x3c3RQN1phenhIMGloMkl2Y3dBZW9oTmsyZmd3L3k5cXpZcytmeDBpQjZraXc1dFFEOE41TVpyOTdSCkxrdjN1SllFK2hJVFF6SlVWS1NNdkQ4cWE3emV2enlpUUw1eVJNSEFaakVNdFAzUVpMRGhKVXZRSWJsTW1sUVUKOVQ3UVR1SFg3MTVwVE9MMEJaWnZJbFlWaXI0THQ0Kzd3UW9yYTY3SjFhMmw2c2t6cSt5cGVBZU9KRk9zSEdvWApGNmgxZnpsSUt6UlYzS0l5MFlmSTVUdkxUaTdBMkVieGo4NGZVYytvZ1ovaTFMdExuQTQrWURFTktVTURzTHdFCk9mQUZ2Q3dvVjNFUXk1T1A0eWtsWkE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBdnBPUm41L1hXRlFoSmc2MnVJK0ZSaTBXNVBqL2hTVmsyeFFXQUU3M05Sa3pMMzdTCnl1WFFPSDFWZGtTQUhuSExLY0hqOTMxdmtKdWhrL0VYM0JQbDF1Y1F2UmQ4bTNvTkxhbEQ5QTA3MXJPa3Y3ZS8KM28zdVhyT3ZRZHBGWGZkdnRtTFpvWkd1bk1lRENmbzhiUFk4SGlxU0ZIanIrS0JxaGdaNTRDUGFLTjZIbkhsNAo0OGduRzJJOFNNL0hvKzhRM1I1RzV6SDc3QW5FZXUvUVhWMFArKy9JczBCc2Y5VDhreHJxS0Y4aTFXaDUxcXFSCnBNRlphaStaR200TjZleUFaaFAvUlBwL1FLWk1LYzBLVENsTzFNWGt3RUYrbHZsa0xIVHRFUU16ZmxZaE1lSFgKNWxJakV6QmVQVEdhUjNtRGU0ZkdpdTd3eE1BcGh5bkJvQUNmUFFJREFRQUJBb0lCQUdmZU9BVSs4ZmlUU2NuYgpSUjFNSThBK3ZQYW8rMk1QSVd3Q0E0ZkJnaHl2a21VMWd4L1FwMjdTYUt6ZjR0QTFCeHpJTHo1cFlFLzVjdFFXCkdBSDcyazRKZStjRGtRZVFPdlNEQjZWUlBTYmtuRXRkazdaeHR0Um9ySUdBdkVQZG8wWk5rLzNxVDdmbFNYYzcKcW9sY255RjE1RTVDSmFKSmxDVmVERGpzY1cvSi95a2VGZlYrcDZHWkcvZFByN2VKektLdHRBUVo1d3M1ZGsxbwo5bk54WWczbFdSalU1dHBVMmV6dzYzd0F1dHlnbmtsc1FDOGRaOWJFR3hqRTMrSXRIWUpkMXVLeXF5RlpybEtxCmZFUk1DckJ6RFdKbkw3T2VOZmNLMDRCZG1mNDFPTUNWK3NUNHhpUVpaaENCV1ZTT2F6QUk2aldYV1M4eExMRTUKYXVkYURlRUNnWUVBeDJUV3VjMmdFc3pKZVVoYWw0cEIzU3lHaXlaYmcwNmxETklDWXI1bXZwU3E1dmt5Vk44aQo5K0F3T2twcjdsTnJjSWkzSUJEOE16WGVidjdkaTdFS0NxMXRRc2dLY0diS3NaZXIzVmNKK2tHdnMrVzBGaStNCnI3WHZFSFNsZWNLV3NaMTgzb0JsK1h1bTBQVEtXNkR4bVlDeER3WVI3cWt4QVZURll0dXcxK2tDZ1lFQTlLM3AKYnozTTRLNVFpUWdacjVmcDBkSDlIdWt1aEhKYjJ1dzF1U2ltVHdBY1cvbFRhRG9MTmVOTG84eFlvSWJzVHg1VQpSZndOdnFITkpma2lXS3luYnlyS2s3QjNBZmkveW5HNmpSRzdKajVDWUgxbnZvUityUHhsMWVFclNkUVFad0NJCmFhbklrQnBzNDhFSGJmZlVINE8xRFMwT1JOMXBQbjl6a2hIOUREVUNnWUJLSElIdko2MlNyMGxIYWd3NS9TcUQKOGJQRWJxcGZBTkU2RmFqTFdPZkplR3FaVlJCUEdXemU0eFlwNUZWL2pNUUhYTmxyOHNRNnFKQVhnMldITVhPQgpDbnJzOG50bTBkNE82a2Y0Q2d6c1ZwUGU4c2JmNUNhUGZManh6ZGxmaTJNRmUzclpITEpLYTVwU1dsb0llcWF5CkhuSXhHbGw1OHFzRFNxWGZHN2I4V1FLQmdRQ2VWdWxJdHRxZHo5Q0lUVGlxSElvUTRXNkhrV2tzQndHUWMrbjAKVCswSUZNOUZhZHpqQnlUNEU0YUFrcDRNRENSaXN3TGdZMVBWdU1tVXVGdlV2SzZCejFSWExReG10ejRPV1hqYgpEODFuMjBTRFFzUmZVMGpTMDJkbmVKYlY2U2xRTHRVWVkrcEo3di9taDZVeU1mNFJBdCtvamk2OHUvZituT1lDCmNpZXF2UUtCZ0hBSWkraEVsWTZpdU84NUczUnpBM0JteVVqUE0yMnVzbHkxTGpYTVJ1NXpvaTRRa29QZDg2cFIKWllrWTl2MHIzdDUwRm5Ia2tPbzJnVldBcjNRanNuQzhnemxiV0pWYVU4Q2NDbmtkL0t0a0NvVGtaNy9vK0swWQpKNGpRNWxGOVNNYXJPVThsNjR6UllQWVVsVTJzRng3ZzBpWURMUlJLa0hLblF1MGROMDN3Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: non-etcd
+  namespace: default
+  labels:
+    api: non-etcd
+    apiserver: "true"
+spec:
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    api: non-etcd

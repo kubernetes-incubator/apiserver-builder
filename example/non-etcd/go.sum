@@ -1155,6 +1155,8 @@ sigs.k8s.io/apiserver-runtime v1.0.1-0.20210414114843-a43bd40fbc99 h1:YQPdgkMrCv
 sigs.k8s.io/apiserver-runtime v1.0.1-0.20210414114843-a43bd40fbc99/go.mod h1:kNGAXFpRkUM9EWVST+5o9QYW8WHYI6x+C/wuE4Nxd2I=
 sigs.k8s.io/apiserver-runtime v1.0.1 h1:SLzBQCZnll5D4TQnHT+xXnqc2Zu7WVetXCrm1poprWQ=
 sigs.k8s.io/apiserver-runtime v1.0.1/go.mod h1:kNGAXFpRkUM9EWVST+5o9QYW8WHYI6x+C/wuE4Nxd2I=
+sigs.k8s.io/apiserver-runtime v1.0.2-0.20210429095450-03d34e8e73b6 h1:fQSZNQoJxbP6HjdyYt4NDosO7HrP93lhPN0rtxaALp8=
+sigs.k8s.io/apiserver-runtime v1.0.2-0.20210429095450-03d34e8e73b6/go.mod h1:kNGAXFpRkUM9EWVST+5o9QYW8WHYI6x+C/wuE4Nxd2I=
 sigs.k8s.io/controller-runtime v0.6.0 h1:Fzna3DY7c4BIP6KwfSlrfnj20DJ+SeMBK8HSFvOk9NM=
 sigs.k8s.io/controller-runtime v0.6.0/go.mod h1:CpYf5pdNY/B352A1TFLAS2JVSlnGQ5O2cftPHndTroo=
 sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e/go.mod h1:wWxsB5ozmmv/SG7nM11ayaAW51xMvak/t1r0CSlcokI=

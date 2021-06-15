@@ -10,6 +10,6 @@ require (
 	github.com/onsi/gomega v1.10.2 // indirect
 	k8s.io/apimachinery v0.20.5
 	k8s.io/klog v1.0.0
-	sigs.k8s.io/apiserver-runtime v1.0.1
+	sigs.k8s.io/apiserver-runtime v1.0.2-0.20210429095450-03d34e8e73b6
 	sigs.k8s.io/controller-runtime v0.6.0 // indirect
 )

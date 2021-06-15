@@ -1,4 +1,4 @@
 
 version: "1"
-domain: example.com
+domain: k8s.io
 repo: sigs.k8s.io/apiserver-builder-alpha/example/non-etcd
